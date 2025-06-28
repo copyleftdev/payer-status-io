@@ -1,0 +1,33 @@
+payers:
+  - name: Aetna
+    endpoints:
+      - type: login
+        url: https://claimconnect.dentalxchange.com/dci/wicket/page
+        schedule: 2m
+        method: GET
+  - name: Cigna
+    endpoints:
+      - type: api
+        url: https://httpbin.org/status/200
+        schedule: 3m
+        method: GET
+        description: Test endpoint that returns 200 OK
+  - name: Delta Dental
+    endpoints:
+      - type: patient_search
+        url: https://httpbin.org/delay/1
+        schedule: 1m
+        method: GET
+        description: Test endpoint with 1 second delay
+  - name: Test Payer
+    endpoints:
+      - type: eligibility
+        url: https://httpbin.org/status/500
+        schedule: 2m
+        method: GET
+        description: Test endpoint that returns 500 error
+      - type: claims_address
+        url: https://httpbin.org/json
+        schedule: 5m
+        method: GET
+        description: Test endpoint that returns JSON

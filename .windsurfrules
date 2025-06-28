@@ -1,0 +1,255 @@
+# Payer Status IO - WebSocket Health Monitor
+# Windsurf Rules for High-Performance Go Architecture
+# ===================================================
+
+## 🎯 PROJECT OVERVIEW
+This is a professional-grade WebSocket Health Monitor written in Go that provides real-time health telemetry for 25+ insurance payer endpoints. The system must maintain 99.9% uptime with ≤200ms p50 latency while handling concurrent WebSocket connections and HTTP probes.
+
+## 🏗️ ARCHITECTURAL PRINCIPLES
+
+### Core Components (NEVER DEVIATE)
+- **WebSocket Hub**: Fan-out observer pattern for real-time broadcasts
+- **Scheduler**: Min-heap priority queue with rate limiting and jitter
+- **Worker Pool**: Concurrent HTTP probe execution with context cancellation
+- **Metrics Collector**: Prometheus integration for observability
+- **Config Manager**: Hot-reloadable YAML configuration with SIGHUP
+
+### Package Structure (STRICTLY ENFORCE)
+```
+health-ws/
+├─ cmd/server/main.go           # Entry point with graceful shutdown
+├─ internal/
+│   ├─ config/                  # YAML parsing & live reload
+│   ├─ scheduler/               # Heap, limiter, task structs
+│   ├─ prober/                  # HTTP client pool & probe logic
+│   ├─ hub/                     # WebSocket connection management
+│   └─ metrics/                 # Prometheus counters & histograms
+├─ docs/
+│   ├─ spec.md                  # Complete design specification
+│   └─ payer_status.yaml        # Endpoint configuration matrix
+└─ deployments/                 # Helm charts & Docker configs
+```
+
+## 🔧 CODING STANDARDS
+
+### Go Best Practices (MANDATORY)
+- Use `context.Context` for ALL goroutines and cancellation
+- Implement graceful shutdown with `golang.org/x/sync/errgroup`
+- Apply structured logging with `go.uber.org/zap`
+- Use `sync.Pool` for object reuse (ProbeResult, http.Client)
+- Implement proper error wrapping with `fmt.Errorf`
+- Follow effective Go naming conventions (no stuttering)
+
+### Concurrency Rules (CRITICAL)
+- NO goroutine leaks - every goroutine must respect context cancellation
+- Use buffered channels with appropriate capacity (avoid blocking)
+- Implement back-pressure handling - drop slow WebSocket clients
+- Apply rate limiting per endpoint with `golang.org/x/time/rate`
+- Add ±10% random jitter to prevent thundering herd
+
+### Performance Requirements (NON-NEGOTIABLE)
+- HTTP keep-alive with connection pooling per hostname
+- Zero-copy JSON encoding where possible
+- Pre-allocate slices and maps with known capacity
+- Use `container/heap` for scheduler priority queue
+- Implement connection limits and timeouts
+- Memory profiling must show no significant leaks
+
+## 📊 DATA MODEL CONSTRAINTS
+
+### Endpoint Configuration (payer_status.yaml)
+```yaml
+payers:
+  - name: string          # Payer identifier (e.g., "Aetna", "Cigna")
+    endpoints:
+      - type: string      # login|api|patient_search|pdf_extraction|claims_address|eligibility
+        url: string       # Full URL or environment variable reference
+        method: string    # HTTP method (default: GET)
+        schedule: duration # Probe interval (default: 15m, min: 1m)
+        description: string # Optional context
+```
+
+### Runtime Events (ProbeResult)
+```go
+type ProbeResult struct {
+    Timestamp   time.Time `json:"ts"`
+    Payer       string    `json:"payer"`
+    Type        string    `json:"type"`
+    URL         string    `json:"url"`
+    LatencyMS   int64     `json:"latency_ms"`
+    StatusCode  int       `json:"status_code"`
+    Err         string    `json:"err,omitempty"`
+}
+```
+
+## 🔒 SECURITY REQUIREMENTS
+
+### WebSocket Security (ENFORCE)
+- Force TLS with `wss://` protocol only
+- Implement HSTS headers
+- Apply CORS restrictions to known domains
+- Set `websocket.ReaderLimit` for DoS protection
+- Optional JWT authentication with scope validation
+
+### HTTP Client Security
+- Set reasonable timeouts (10s read, 10s write)
+- Disable HTTP/2 for problematic endpoints
+- Implement certificate validation
+- Use secure TLS configuration
+
+## 🚀 DEPLOYMENT STANDARDS
+
+### Container Requirements
+- Alpine-based multi-stage build
+- Final binary size < 15MB
+- Non-root user execution
+- Health check endpoint at `/health`
+
+### Kubernetes Integration
+- HPA based on CPU and WebSocket connection count
+- ConfigMap for endpoints.yaml with version control
+- Prometheus ServiceMonitor for metrics scraping
+- PodDisruptionBudget for high availability
+
+## 📈 MONITORING & OBSERVABILITY
+
+### Required Metrics (Prometheus)
+- `probe_duration_seconds` (histogram by payer, type)
+- `probe_total` (counter by payer, type, status_code)
+- `websocket_connections_active` (gauge)
+- `websocket_messages_sent_total` (counter)
+- `config_reload_total` (counter by success/failure)
+
+### Logging Standards
+- Structured JSON logging with zap
+- Log levels: DEBUG, INFO, WARN, ERROR
+- Include trace IDs for request correlation
+- No sensitive data in logs (URLs may contain tokens)
+
+## 🧪 TESTING STRATEGY
+
+### Unit Tests (REQUIRED)
+- Scheduler with deterministic fake clock
+- Prober with `httptest.Server` mocks
+- Hub with property-based testing
+- Config parsing with invalid YAML scenarios
+
+### Integration Tests
+- Docker Compose with mock endpoints
+- Load testing with 5k WebSocket connections
+- Graceful shutdown behavior validation
+- Configuration hot-reload verification
+
+## 🚨 ERROR HANDLING
+
+### Resilience Patterns (IMPLEMENT)
+- Circuit breaker for failing endpoints
+- Exponential backoff with jitter
+- Timeout handling at multiple layers
+- Graceful degradation under load
+
+### Error Categories
+- **Transient**: Network timeouts, 5xx responses
+- **Permanent**: 4xx client errors, DNS failures
+- **Configuration**: Invalid YAML, missing endpoints
+- **System**: Out of memory, file descriptor limits
+
+## 🔄 CONFIGURATION MANAGEMENT
+
+### Hot Reload Behavior
+- Watch `endpoints.yaml` for file changes
+- Validate new configuration before applying
+- Gracefully handle endpoint additions/removals
+- Preserve existing WebSocket connections during reload
+- Log configuration changes with diff summary
+
+### Environment Variables
+- `CONFIG_PATH`: Path to endpoints.yaml (default: ./endpoints.yaml)
+- `LOG_LEVEL`: Logging verbosity (default: INFO)
+- `METRICS_PORT`: Prometheus metrics port (default: 9090)
+- `WS_PORT`: WebSocket server port (default: 8080)
+
+## 🎛️ OPERATIONAL GUIDELINES
+
+### Startup Sequence
+1. Load and validate configuration
+2. Initialize metrics collectors
+3. Start WebSocket hub
+4. Start scheduler with worker pool
+5. Start HTTP servers (WebSocket + metrics)
+6. Register signal handlers for graceful shutdown
+
+### Shutdown Sequence
+1. Stop accepting new WebSocket connections
+2. Cancel scheduler context
+3. Wait for active probes to complete (max 30s)
+4. Close existing WebSocket connections
+5. Shutdown HTTP servers with timeout
+
+## 🔍 DEBUGGING & TROUBLESHOOTING
+
+### Common Issues
+- **High memory usage**: Check for goroutine leaks, review sync.Pool usage
+- **Slow responses**: Verify rate limiting, check connection pool exhaustion
+- **WebSocket drops**: Investigate back-pressure handling, client timeout settings
+- **Config reload failures**: Validate YAML syntax, check file permissions
+
+### Debug Endpoints
+- `GET /debug/pprof/`: Go profiling endpoints
+- `GET /debug/vars`: Runtime statistics
+- `GET /health`: Service health check
+- `GET /metrics`: Prometheus metrics
+
+## 📋 PAYER-SPECIFIC CONSIDERATIONS
+
+### Known Endpoint Behaviors
+- **Aetna**: Dynamic URL construction required
+- **Cigna**: Centralized API proxy integration
+- **Delta Dental**: State-specific variations (WA, IA, ID, WY)
+- **Medicaid**: Multiple state implementations with different auth
+- **PDF Extraction**: Environment variable URL configuration
+
+### Rate Limiting Strategy
+- Conservative defaults: 1 request per 15 minutes per endpoint
+- Aggressive payers (high volume): 5 minute intervals
+- API endpoints: Higher frequency than login pages
+- Respect robots.txt and rate limit headers
+
+## ⚡ PERFORMANCE TARGETS
+
+### Latency Requirements
+- WebSocket message delivery: < 200ms p50
+- HTTP probe execution: < 10s p99
+- Configuration reload: < 5s
+- Graceful shutdown: < 30s
+
+### Throughput Targets
+- Support 10,000+ concurrent WebSocket connections
+- Handle 1,000+ endpoints with mixed schedules
+- Process 100+ probes per second during peak
+- Maintain < 1% error rate under normal conditions
+
+## 🛡️ RELIABILITY PATTERNS
+
+### Circuit Breaker Configuration
+- Failure threshold: 5 consecutive failures
+- Recovery timeout: 60 seconds
+- Half-open test requests: 3 attempts
+
+### Retry Logic
+- Exponential backoff: 1s, 2s, 4s, 8s, 16s (max)
+- Jitter: ±25% of calculated delay
+- Max retries: 3 for transient errors
+- No retries for 4xx client errors
+
+---
+
+## 🎯 SUCCESS CRITERIA
+This WebSocket Health Monitor is considered successful when it:
+- Maintains 99.9% uptime in production
+- Delivers real-time payer status with sub-200ms latency
+- Handles configuration changes without service interruption
+- Provides comprehensive observability for operations teams
+- Scales horizontally to support business growth
+
+**Remember: This is a mission-critical system for healthcare operations. Every line of code must prioritize reliability, performance, and maintainability.**

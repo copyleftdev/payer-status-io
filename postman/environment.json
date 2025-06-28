@@ -1,0 +1,44 @@
+{
+	"id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+	"name": "Payer Status Monitor - Local",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "default",
+			"enabled": true,
+			"description": "Base URL for the WebSocket Health Monitor server"
+		},
+		{
+			"key": "metrics_url",
+			"value": "http://localhost:9090",
+			"type": "default",
+			"enabled": true,
+			"description": "URL for the Prometheus metrics endpoint"
+		},
+		{
+			"key": "websocket_url",
+			"value": "ws://localhost:8080/ws",
+			"type": "default",
+			"enabled": true,
+			"description": "WebSocket endpoint URL for real-time probe results"
+		},
+		{
+			"key": "health_endpoint",
+			"value": "/health",
+			"type": "default",
+			"enabled": true,
+			"description": "Health check endpoint path"
+		},
+		{
+			"key": "metrics_endpoint",
+			"value": "/metrics",
+			"type": "default",
+			"enabled": true,
+			"description": "Prometheus metrics endpoint path"
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2024-01-15T10:30:00.000Z",
+	"_postman_exported_using": "Postman/10.20.0"
+}

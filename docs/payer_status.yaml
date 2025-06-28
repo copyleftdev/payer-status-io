@@ -1,0 +1,263 @@
+payers:
+  - name: Aetna
+    endpoints:
+      - type: base
+        url: https://claimconnect.dentalxchange.com/dci/wicket/page
+        schedule: 5m
+  - name: Ameritas
+    endpoints:
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+  - name: Blue Cross Blue Shield Utah
+    endpoints:
+      - type: login
+        url: https://www.mydentalcoverage.com/dentists.shtml
+      - type: patient_search
+        url: https://www.mydentalcoverage.com/tuctpi/subscriber.xhtml
+  - name: Cigna
+    endpoints:
+      - type: api
+        url: ${process.env.URL_IV_CHANGE_HEALTHCARE}
+        description: Retrieved via the centralized api-proxy module.
+  - name: CHAMPS
+    endpoints:
+      - type: login
+        url: https://milogintp.michigan.gov/eai/tplogin/authenticate?URL=/
+  - name: Dentaquest
+    endpoints:
+      - type: eligibility
+        url: https://govservices.dentaquest.com/Router.jsp?source=SearchMember&component=Members&code=MEMBER_ELIG_SEARCH&targetLink=true
+        description: Government Services
+      - type: contact_us
+        url: https://www.dentaquest.com/en/policies/nondiscrimination-notice
+        description: Government Services
+      - type: login
+        url: https://provideraccess.dentaquest.com/
+        description: Provider Access
+  - name: Denti-Cal
+    endpoints:
+      - type: login
+        url: https://providerportal.denti-cal.ca.gov/ProviderBase/ProviderPortalHome
+      - type: api
+        url: https://providerportal.denti-cal.ca.gov/api/GetTreatmentHistory
+        description: Intercepted during patient search.
+  - name: Delta Dental
+    endpoints:
+      - type: patient_search
+        url: https://secure.deltadentalia.com/portal/dentist/patient-info/patient-search
+        description: Iowa
+      - type: api
+        url: https://www.deltadentalwa.com/private/provider/api/patient-search
+        description: Washington
+      - type: api
+        url: https://www.deltadentalwa.com/private/provider/api/dashboard
+        description: Washington
+      - type: api
+        url: https://www.deltadentalwa.com/private/provider/api/plan-info
+        description: Washington
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+        description: Wyoming & Idaho
+      - type: login
+        url: https://deltadentalid.com/Login
+        description: Idaho
+      - type: login
+        url: https://www.deltadentalwy.org/Login
+        description: Wyoming
+  - name: GEHA
+    endpoints:
+      - type: login
+        url: https://www.geha.com
+      - type: patient_search
+        url: https://provider.mygeha.com/tpa-ap-web/
+      - type: api
+        url: https://provider.mygeha.com/tpa-ap-benefits-web/coveragePersonalInfo
+      - type: api
+        url: https://provider.mygeha.com/tpa-ap-claims-web/claimsContentResponsive
+      - type: api
+        url: https://provider.mygeha.com/tpa-ap-claims-web/claimsSummary
+      - type: api
+        url: https://provider.mygeha.com/tpa-ap-benefits-web/benefits
+  - name: Guardian
+    endpoints:
+      - type: login
+        url: https://signin.guardianlife.com/signin/precheck/
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+      - type: api
+        path: gautils/v1/memberdependent/benefitspdf
+      - type: api
+        url_contains: guardiananytime.com/gagql/
+      - type: api
+        url_contains: guardiananytime.com/gautils/v1/eobDocument
+  - name: HealthChoice Oklahoma
+    endpoints:
+      - type: login
+        url: https://provider-healthchoice.tpa.com/tpa-ap-web/?navDeepDive=EGID-OK_publicProviderHomeDefaultContentMenu
+  - name: Kansas City Life
+    endpoints:
+      - type: patient_search
+        url: https://kcl.benefitsverify.com/
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+  - name: Liberty Dental
+    endpoints:
+      - type: login
+        url: https://libertydentalplan.com/
+      - type: patient_search
+        url: https://providerportal.libertydentalplan.com/MultipleMemberEligibility
+  - name: Liberty Dental JSON
+    endpoints:
+      - type: api
+        url: https://providerportal.libertydentalplan.com/MemberUtilization/GetBenefitUtilization
+      - type: api
+        url: https://providerportal.libertydentalplan.com/MultipleMemberEligibility
+      - type: api
+        url: https://providerportal.libertydentalplan.com/MemberHistory/ViewHistory
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+  - name: Lincoln Financial
+    endpoints:
+      - type: login
+        url: https://provider.mylincolnportal.com/dental/login
+      - type: api
+        url_contains: dental/bff/graphql
+        description: GraphQL POST requests
+  - name: Maestro Health
+    endpoints:
+      - type: login
+        url: https://mybenefits.maestrohealth.com/
+  - name: Managed Care of North America (MCNA)
+    endpoints:
+      - type: base
+        url: https://portal.mcna.net/
+      - type: claims
+        url: https://www.mcna.net/#contact
+      - type: eligibility
+        url: https://portal.mcna.net/provider/verify_eligibility
+  - name: Medicaid Alaska
+    endpoints:
+      - type: login
+        url: https://www.medicaidalaska.com/portals/wps/portal/enterprise/providerlogin
+      - type: claims_address
+        url: https://www.medicaidalaska.com/portals/wps/portal/MailingAddress
+      - type: eligibility
+        url: https://www.medicaidalaska.com/portal/wps/myportal/enterprise/member/memebereligibilitycheck
+  - name: Medicaid Health Net of Missouri
+    endpoints:
+      - type: login
+        url: https://www.emomed.com/portal/wps/portal/eMOMED/login/
+      - type: login_error
+        url: https://www.emomed.com/pkmslogin.form
+  - name: Medicaid Indiana
+    endpoints:
+      - type: login
+        url: https://portal.indianamedicaid.com/hcp/provider/Home/tabid/135/Default.aspx
+  - name: Medicaid Montana
+    endpoints:
+      - type: login
+        url: https://mtaccesstohealth.portal.conduent.com/mt/general/home.do
+      - type: claims_address
+        url: https://medicaidprovider.mt.gov/contactus
+  - name: Medicaid Nevada
+    endpoints:
+      - type: login
+        url: https://www.medicaid.nv.gov/hcp/provider/Home/tabid/135/Default.aspx
+  - name: Medicaid Oklahoma
+    endpoints:
+      - type: login
+        url: https://www.ohcaprovider.com/hcp/provider/Home/tabid/135/Default.aspx
+  - name: Medicaid Washington
+    endpoints:
+      - type: login
+        url: https://identity.onehealthport.com/EmpowerIDWebIdPForms/Login/HCA_PROVIDERONE
+  - name: Massachusetts Health
+    endpoints:
+      - type: login
+        url: https://providers.massdhp.com/providers_ci.asp
+  - name: Meritain Health
+    endpoints:
+      - type: login
+        url: https://account.meritain.com/
+      - type: patient_search
+        url: https://connect.meritain.com/Provider/EligibilityBenefits
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+  - name: MetLife
+    endpoints:
+      - type: login
+        url: https://metdental.metlife.com
+  - name: Principal
+    endpoints:
+      - type: api
+        url: ${process.env.API_IV_PRINCIPAL}
+  - name: Public Employees Health Program Alternative
+    endpoints:
+      - type: login
+        url: https://pehpproviders.healthtrioconnect.com/app/index.page
+  - name: Safeguard
+    endpoints:
+      - type: pdf_extraction
+        url: ${process.env.URL_PDF_EXTRACTOR}/extract-pdf/
+  - name: Skygen
+    endpoints:
+      - type: login
+        url: https://mutualofomahapwp.skygenusasystems.com
+        description: Mutual of Omaha
+      - type: login
+        url: https://pwp.envolvedental.com/PWP/Landing
+        description: Envolve
+      - type: api
+        path: PWP/BenefitSummaryReport/GetBenefitSummaryReport
+      - type: api
+        path: PWP/BenefitSummaryReport/GetBenefitSummaryCoveredServices
+      - type: api
+        path: PWP/BenefitSummaryReport/GetBenefitSummaryReportMemberData
+      - type: api
+        path: PWP/BenefitSummaryReport/BenefitSummaryCodeSearch
+      - type: api
+        path: Areas/PWP/Reports/ServiceHistory.aspx
+      - type: api
+        path: PWP/BenefitSummaryReport/GetBenefitSummaryServiceLimitationsData
+      - type: api
+        path: PortalWebSession/SetWebSessionProperties
+      - type: claims_address
+        url: https://www.horizonnjhealth.com/for-providers/resources/timely-filing-requirements#:~:text=Claims%20Services,Newark%2C%20NJ%2007101%2D0406
+  - name: Sun Life Dentaquest
+    endpoints:
+      - type: patient_search
+        url: https://providers.dentaquest.com/member-eligibility-search/
+        description: PDF & JSON
+      - type: api
+        path: family-info
+        description: JSON
+      - type: api
+        path: clinical-history
+        description: JSON
+      - type: api
+        path: claim-history
+        description: JSON
+      - type: api
+        path: plan-info
+        description: JSON
+      - type: api
+        path: enrollment-history
+        description: JSON
+      - type: api
+        path: maximum-deductible
+        description: JSON
+      - type: api
+        path: member-info
+        description: JSON
+      - type: api
+        path: plan-benefit-summary
+        description: JSON
+      - type: api
+        path: coordination-of-benefits
+        description: JSON
+  - name: United Concordia
+    endpoints:
+      - type: patient_search
+        url: https://www.unitedconcordia.com/tuctpi/index.xhtml
+      - type: login
+        url: https://www.unitedconcordia.com/duadrr/login.xhtml

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  health-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # WebSocket/HTTP
+      - "9090:9090"  # Metrics
+    environment:
+      - PORT=8080
+      - METRICS_PORT=9090
+      - LOG_LEVEL=info
+      - CONFIG_PATH=./docs/payer_status.yaml
+      # Add any required environment variables here
+      # - URL_PDF_EXTRACTOR=http://your-pdf-extractor
+      # - URL_IV_CHANGE_HEALTHCARE=http://your-change-healthcare
+    volumes:
+      # Mount local config and test files for development
+      - ./docs:/app/docs
+      - ./test:/app/test
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Uncomment and configure if you need Prometheus for metrics
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'

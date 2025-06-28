@@ -1,0 +1,44 @@
+[Unit]
+Description=WebSocket Health Monitor - Payer Endpoint Monitoring Service
+Documentation=https://github.com/your-org/payer-status-io
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sigma
+Group=sigma
+WorkingDirectory=/home/sigma/Projects/payer-status-io
+ExecStart=/home/sigma/Projects/payer-status-io/bin/health-monitor
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Environment variables
+Environment=CONFIG_PATH=/home/sigma/Projects/payer-status-io/docs/payer_status.yaml
+Environment=GOMAXPROCS=4
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/sigma/Projects/payer-status-io/logs
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+MemoryMax=1G
+CPUQuota=200%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=health-monitor
+
+[Install]
+WantedBy=multi-user.target

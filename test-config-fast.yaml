@@ -1,0 +1,33 @@
+payers:
+  - name: Aetna
+    endpoints:
+      - type: base
+        url: https://httpbin.org/status/200
+        schedule: 1m
+      - type: api
+        url: https://httpbin.org/json
+        schedule: 1m
+  - name: Cigna
+    endpoints:
+      - type: login
+        url: https://httpbin.org/delay/1
+        schedule: 1m
+      - type: eligibility
+        url: https://httpbin.org/status/503
+        schedule: 1m
+  - name: Delta Dental
+    endpoints:
+      - type: patient_search
+        url: https://httpbin.org/status/404
+        schedule: 2m
+      - type: claims
+        url: https://httpbin.org/headers
+        schedule: 2m
+  - name: Test Payer
+    endpoints:
+      - type: health_check
+        url: https://httpbin.org/status/200
+        schedule: 1m
+      - type: slow_endpoint
+        url: https://httpbin.org/delay/3
+        schedule: 1m

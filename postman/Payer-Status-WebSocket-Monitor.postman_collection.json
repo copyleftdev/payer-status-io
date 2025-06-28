@@ -1,0 +1,526 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Payer Status WebSocket Monitor",
+		"description": "Complete test collection for the WebSocket Health Monitor system. Tests HTTP endpoints, WebSocket connections, and subscription filtering.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "HTTP Endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct content type\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"pm.test(\"Health check response is valid\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property(\"status\", \"healthy\");",
+									"    pm.expect(responseJson).to.have.property(\"service\", \"payer-status-monitor\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the WebSocket Health Monitor service is running and healthy."
+					},
+					"response": []
+				},
+				{
+					"name": "Prometheus Metrics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains probe metrics\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"probe_duration_seconds\");",
+									"    pm.expect(responseText).to.include(\"probe_total\");",
+									"});",
+									"",
+									"pm.test(\"Response contains WebSocket metrics\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"websocket_connections_active\");",
+									"    pm.expect(responseText).to.include(\"websocket_messages_sent_total\");",
+									"});",
+									"",
+									"pm.test(\"Response contains config metrics\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"config_reload_total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{metrics_url}}/metrics",
+							"host": [
+								"{{metrics_url}}"
+							],
+							"path": [
+								"metrics"
+							]
+						},
+						"description": "Retrieve Prometheus metrics from the health monitor including probe statistics, WebSocket connections, and configuration reload counts."
+					},
+					"response": []
+				},
+				{
+					"name": "Web Dashboard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is HTML\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\");",
+									"});",
+									"",
+									"pm.test(\"Dashboard contains expected elements\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"Payer Status Monitor\");",
+									"    pm.expect(responseText).to.include(\"Real-time health monitoring\");",
+									"    pm.expect(responseText).to.include(\"WebSocket\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Access the web dashboard for real-time monitoring of payer endpoint health."
+					},
+					"response": []
+				},
+				{
+					"name": "Debug Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct content type\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"pm.test(\"Stats response contains hub information\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"hub_stats\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"debug",
+								"stats"
+							]
+						},
+						"description": "Get debug statistics from the WebSocket hub including connection counts and message statistics."
+					},
+					"response": []
+				}
+			],
+			"description": "Test all HTTP endpoints provided by the WebSocket Health Monitor server."
+		},
+		{
+			"name": "WebSocket Tests",
+			"item": [
+				{
+					"name": "WebSocket Connection - Subscribe All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"WebSocket connection established\", function () {",
+									"    pm.expect(pm.response.code).to.equal(101);",
+									"});",
+									"",
+									"pm.test(\"Received probe results\", function () {",
+									"    // Check if we received any WebSocket messages",
+									"    const messages = pm.response.messages();",
+									"    if (messages && messages.length > 0) {",
+									"        const firstMessage = JSON.parse(messages[0].data);",
+									"        pm.expect(firstMessage).to.have.property('payer');",
+									"        pm.expect(firstMessage).to.have.property('type');",
+									"        pm.expect(firstMessage).to.have.property('latency_ms');",
+									"        pm.expect(firstMessage).to.have.property('status_code');",
+									"        console.log('Received probe result:', firstMessage);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "WEBSOCKET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"action\":\"subscribe\",\"payers\":[],\"types\":[]}"
+						},
+						"url": {
+							"raw": "ws://localhost:8080/ws",
+							"protocol": "ws",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ws"
+							]
+						},
+						"description": "Connect to WebSocket and subscribe to all payer probe results"
+					},
+					"response": []
+				},
+				{
+					"name": "WebSocket Connection - Filter by Payer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"WebSocket connection established\", function () {",
+									"    pm.expect(pm.response.code).to.equal(101);",
+									"});",
+									"",
+									"pm.test(\"Received filtered probe results\", function () {",
+									"    const messages = pm.response.messages();",
+									"    if (messages && messages.length > 0) {",
+									"        const firstMessage = JSON.parse(messages[0].data);",
+									"        pm.expect(firstMessage.payer).to.equal('Aetna');",
+									"        console.log('Received filtered result for Aetna:', firstMessage);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "WEBSOCKET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"action\":\"subscribe\",\"payers\":[\"Aetna\"],\"types\":[]}"
+						},
+						"url": {
+							"raw": "ws://localhost:8080/ws",
+							"protocol": "ws",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ws"
+							]
+						},
+						"description": "Connect to WebSocket and subscribe to Aetna probe results only"
+					},
+					"response": []
+				},
+				{
+					"name": "WebSocket Connection - Filter by Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"WebSocket connection established\", function () {",
+									"    pm.expect(pm.response.code).to.equal(101);",
+									"});",
+									"",
+									"pm.test(\"Received type-filtered probe results\", function () {",
+									"    const messages = pm.response.messages();",
+									"    if (messages && messages.length > 0) {",
+									"        const firstMessage = JSON.parse(messages[0].data);",
+									"        pm.expect(firstMessage.type).to.equal('login');",
+									"        console.log('Received login endpoint result:', firstMessage);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "WEBSOCKET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"action\":\"subscribe\",\"payers\":[],\"types\":[\"login\"]}"
+						},
+						"url": {
+							"raw": "ws://localhost:8080/ws",
+							"protocol": "ws",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ws"
+							]
+						},
+						"description": "Connect to WebSocket and subscribe to login endpoint results only"
+					},
+					"response": []
+				},
+				{
+					"name": "WebSocket Connection - Combined Filter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"WebSocket connection established\", function () {",
+									"    pm.expect(pm.response.code).to.equal(101);",
+									"});",
+									"",
+									"pm.test(\"Received combined filtered results\", function () {",
+									"    const messages = pm.response.messages();",
+									"    if (messages && messages.length > 0) {",
+									"        const firstMessage = JSON.parse(messages[0].data);",
+									"        pm.expect(firstMessage.payer).to.equal('Cigna');",
+									"        pm.expect(['api', 'eligibility']).to.include(firstMessage.type);",
+									"        console.log('Received combined filtered result:', firstMessage);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "WEBSOCKET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"action\":\"subscribe\",\"payers\":[\"Cigna\"],\"types\":[\"api\",\"eligibility\"]}"
+						},
+						"url": {
+							"raw": "ws://localhost:8080/ws",
+							"protocol": "ws",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"ws"
+							]
+						},
+						"description": "Connect to WebSocket and subscribe to Cigna API and eligibility results only"
+					},
+					"response": []
+				}
+			],
+			"description": "WebSocket connection tests with various subscription filtering scenarios"
+		},
+		{
+			"name": "Load Testing",
+			"item": [
+				{
+					"name": "Concurrent Health Checks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is acceptable\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Service remains healthy under load\", function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.status).to.equal(\"healthy\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Test server performance under concurrent load. Run this with high iteration counts to simulate load."
+					},
+					"response": []
+				},
+				{
+					"name": "Metrics Under Load",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is acceptable\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"pm.test(\"Metrics endpoint remains responsive\", function () {",
+									"    const responseText = pm.response.text();",
+									"    pm.expect(responseText).to.include(\"probe_total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{metrics_url}}/metrics",
+							"host": [
+								"{{metrics_url}}"
+							],
+							"path": [
+								"metrics"
+							]
+						},
+						"description": "Test metrics endpoint performance under load to ensure Prometheus scraping remains reliable."
+					},
+					"response": []
+				}
+			],
+			"description": "Load testing scenarios to validate performance under concurrent requests."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set default values if not already set",
+					"if (!pm.environment.get(\"base_url\")) {",
+					"    pm.environment.set(\"base_url\", \"http://localhost:8080\");",
+					"}",
+					"",
+					"if (!pm.environment.get(\"metrics_url\")) {",
+					"    pm.environment.set(\"metrics_url\", \"http://localhost:9090\");",
+					"}",
+					"",
+					"console.log(\"Base URL: \" + pm.environment.get(\"base_url\"));",
+					"console.log(\"Metrics URL: \" + pm.environment.get(\"metrics_url\"));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test to log response times",
+					"console.log(\"Response time: \" + pm.response.responseTime + \"ms\");",
+					"",
+					"// Log any errors for debugging",
+					"if (pm.response.code >= 400) {",
+					"    console.log(\"Error response: \" + pm.response.text());",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string",
+			"description": "Base URL for the WebSocket Health Monitor server"
+		},
+		{
+			"key": "metrics_url",
+			"value": "http://localhost:9090",
+			"type": "string",
+			"description": "URL for the Prometheus metrics endpoint"
+		},
+		{
+			"key": "websocket_url",
+			"value": "ws://localhost:8080/ws",
+			"type": "string",
+			"description": "WebSocket endpoint URL for real-time probe results"
+		}
+	]
+}
