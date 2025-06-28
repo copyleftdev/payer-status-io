@@ -1,6 +1,6 @@
 [Unit]
 Description=WebSocket Health Monitor - Payer Endpoint Monitoring Service
-Documentation=https://github.com/your-org/payer-status-io
+Documentation=https://github.com/copyleftdev/payer-status-io
 After=network.target
 Wants=network-online.target
 
